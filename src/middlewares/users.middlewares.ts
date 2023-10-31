@@ -205,7 +205,10 @@ export const accessTokenvalidator = validate(
             }
             //1. verify acccess_token này có phải của server tạo ra không ?
             try {
-              const decoded_authorization = await verifyToken({ token: acccess_token })
+              const decoded_authorization = await verifyToken({
+                token: acccess_token,
+                secretOrPublickey: process.env.JWT_SECRET_ACCESS_TOKEN as string
+              })
               ;(req as Request).decoded_authorization = decoded_authorization
             } catch (error) {
               throw new ErrorWithStatus({
@@ -236,7 +239,10 @@ export const refreshTokenValidator = validate(
           options: async (value: string, { req }) => {
             //1. verify refresh_token này có phải của server tạo ra không ?
             try {
-              const decoded_refresh_token = await verifyToken({ token: value })
+              const decoded_refresh_token = await verifyToken({
+                token: value,
+                secretOrPublickey: process.env.JWT_SECRET_REFRESH_TOKEN as string
+              })
               const refresh_token = await databaseService.refreshTokens.findOne({
                 token: value
               })
