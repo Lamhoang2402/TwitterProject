@@ -1,19 +1,34 @@
 import express, { NextFunction, Request, Response } from 'express'
 import userRoute from './routes/users.routes'
 import databaseService from './services/database.services'
-import { log } from 'console'
 import { defaultErrorHandler } from './middlewares/error.middlewares'
+import mediasRoute from './routes/media.routes'
+import { initFolder } from './utils/file'
+import { config } from 'dotenv'
+import { UPLOAD_IMAGE_DIR, UPLOAD_VIDEO_DIR } from './constants/dir'
+import staticRoute from './routes/static.routes'
+import { MongoClient } from 'mongodb'
+
+config()
 const app = express()
+const router = express.Router()
+const PORT = process.env.PORT || 4000
+initFolder()
 app.use(express.json())
-const PORT = 3000
-databaseService.connect()
-//route localhost:3000/
+
+databaseService.connect().then(() => {
+  databaseService.indexUsers()
+})
+
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
 app.use('/users', userRoute)
-//localhost:3000/api/tweets
+app.use('/medias', mediasRoute)
+// app.use('/static', express.static(UPLOAD_IMAGE_DIR))
+app.use('/static', staticRoute)
+// app.use('/static/video', express.static(UPLOAD_VIDEO_DIR))
 
 app.use(defaultErrorHandler)
 app.listen(PORT, () => {

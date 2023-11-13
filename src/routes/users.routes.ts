@@ -1,26 +1,34 @@
 import { Router } from 'express'
 import {
   accessTokenvalidator,
+  changePasswordValidator,
   emailVerifyTokenValidator,
+  followValidator,
   forgotPasswordValidator,
   loginValidator,
   refreshTokenValidator,
   registerValidator,
   resetPasswordValidator,
+  unfollowValidator,
   updateMeValidator,
   verifiedUserValidator,
   verifyForgotPasswordValidator
 } from '~/middlewares/users.middlewares'
 import {
+  changePasswordController,
   emailVerifyTokenController,
+  followController,
   forgotPasswordController,
   getMeController,
   getProfileController,
   loginController,
   logoutController,
+  oAuthController,
+  refreshTokenController,
   registerController,
   resendEmailVerifyController,
   resetPasswordController,
+  unfollowController,
   updateMeController,
   verifyForgotPasswordTokenController
 } from '~/controllers/users.controllers'
@@ -36,7 +44,7 @@ method: POST
 body: {email, password}
 */
 
-userRoute.get('/login', loginValidator, wrapAsync(loginController))
+userRoute.post('/login', loginValidator, wrapAsync(loginController))
 
 userRoute.post('/register', registerValidator, wrapAsync(registerController))
 /*
@@ -134,4 +142,61 @@ userRoute.patch(
 )
 
 userRoute.get('/:username', wrapAsync(getProfileController))
+
+/*
+des: Follow someone
+path: '/follow'
+method: post
+headers: {Authorization: Bearer <access_token>}
+body: {followed_user_id: string}
+*/
+/*
+user lamhoang24024 654b965d8aa3b5753aff4536
+user lamhoang24025 654b972ce41bc339aaec750a
+*/
+userRoute.post('/follow', accessTokenvalidator, verifiedUserValidator, followValidator, wrapAsync(followController))
+
+/*
+    des: unfollow someone
+    path: '/follow/:user_id'
+    method: delete
+    headers: {Authorization: Bearer <access_token>}
+  g}
+    */
+userRoute.delete(
+  '/unfollow/:user_id',
+  accessTokenvalidator,
+  verifiedUserValidator,
+  unfollowValidator,
+  wrapAsync(unfollowController)
+)
+
+/*
+  des: change password
+  path: '/change-password'
+  method: PUT
+  headers: {Authorization: Bearer <access_token>}
+  Body: {old_password: string, password: string, confirm_password: string}
+g}
+  */
+userRoute.put(
+  '/change-password',
+  accessTokenvalidator,
+  verifiedUserValidator,
+  changePasswordValidator,
+  wrapAsync(changePasswordController)
+)
+//changePasswordValidator kiểm tra các giá trị truyền lên trên body cớ valid k ?
+/*
+  des: refreshtoken
+  path: '/refresh-token'
+  method: POST
+  Body: {refresh_token: string}
+g}
+  */
+userRoute.post('/refresh-token', refreshTokenValidator, wrapAsync(refreshTokenController))
+//khỏi kiểm tra accesstoken, tại nó hết hạn rồi mà
+//refreshController chưa làm
+
+userRoute.get('/oauth/google', wrapAsync(oAuthController))
 export default userRoute
