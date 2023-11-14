@@ -8,6 +8,7 @@ import { config } from 'dotenv'
 import { UPLOAD_IMAGE_DIR, UPLOAD_VIDEO_DIR } from './constants/dir'
 import staticRoute from './routes/static.routes'
 import { MongoClient } from 'mongodb'
+import tweetsRouter from './routes/tweets.routes'
 
 config()
 const app = express()
@@ -18,6 +19,8 @@ app.use(express.json())
 
 databaseService.connect().then(() => {
   databaseService.indexUsers()
+  databaseService.indexRefreshTokens()
+  databaseService.indexFollowers()
 })
 
 app.get('/', (req, res) => {
@@ -26,10 +29,10 @@ app.get('/', (req, res) => {
 
 app.use('/users', userRoute)
 app.use('/medias', mediasRoute)
+app.use('/tweets', tweetsRouter)
 // app.use('/static', express.static(UPLOAD_IMAGE_DIR))
 app.use('/static', staticRoute)
 // app.use('/static/video', express.static(UPLOAD_VIDEO_DIR))
-
 app.use(defaultErrorHandler)
 app.listen(PORT, () => {
   console.log(`Server đang chạy trên port ${PORT}`)
